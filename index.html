@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dearth Motors Tire Wholesale</title>
+  <style>
+    body {font-family: Arial; background:#0f172a; color:white; margin:0; padding:20px;}
+    header {background:#dc2626; padding:30px; text-align:center;}
+    .logo {font-size:4em; font-weight:900;}
+    input {width:90%; max-width:600px; padding:15px; font-size:1.3em; margin:20px;}
+    table {width:100%; border-collapse:collapse; background:white; color:black; margin-top:20px;}
+    th {background:#dc2626; color:white; padding:15px;}
+    td {padding:12px; text-align:center;}
+    .price {font-weight:bold; color:#16a34a; font-size:1.4em;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">DEARTH MOTORS</div>
+    <h1>Wholesale Tire Catalog</h1>
+  </header>
+  <center><input type="text" id="search" placeholder="Search size, brand, model..." onkeyup="filter()"></center>
+  <table id="table">
+    <thead>
+      <tr>
+        <th>Size</th><th>Brand</th><th>Model</th><th>Dearth Motors OTD Price</th>
+        <th>Warehouse 1</th><th>Warehouse 2</th><th>Warehouse 3</th>
+      </tr>
+    </thead>
+    <tbody id="body"></tbody>
+  </table>
+
+  <script src="data.js"></script>
+  <script>
+    function load() {
+      document.getElementById('body').innerHTML = tires.map(r => 
+        `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="price">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`
+      ).join('');
+    }
+    function filter() {
+      const term = document.getElementById('search').value.toLowerCase();
+      const filtered = tires.filter(r => r.join(' ').toLowerCase().includes(term));
+      document.getElementById('body').innerHTML = filtered.map(r => 
+        `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="price">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`
+      ).join('');
+    }
+    load();
+  </script>
+</body>
+</html>
