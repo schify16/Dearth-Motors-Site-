@@ -20,8 +20,7 @@ const fs = require('fs');
   await page.fill('input[placeholder="Password"]', PASSWORD);
   await page.click('text=Sign in');
   await page.waitForTimeout(10000);
-
-  // Go to search page and open the size dropdown to load all sizes
+    // Go to search page and open the size dropdown to load all sizes
   await page.goto('https://flynn-preview.tireweb.com/Search/ByTireSize');
   await page.waitForTimeout(10000);
   await page.click('text=Select Tire Size');
@@ -35,8 +34,7 @@ const fs = require('fs');
   console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire from Flynn!`);
 
   const tires = [];
-
-  for (let i = 0; i < allSizeCodes.length; i++) {
+    for (let i = 0; i < allSizeCodes.length; i++) {
     const sizeCode = allSizeCodes[i];
     const cleanSize = sizeCode.replace(/(\d{3})(\d{2})(\d{1,2})/, '$1/$2R$3');
     const url = `https://flynn-preview.tireweb.com/Search/ByTireSize/${sizeCode}?snowTiresOnly=False`;
@@ -57,8 +55,7 @@ const fs = require('fs');
           w3: c[8]?.innerText.trim() || '0'
         };
       }));
-
-      for (const r of rows) {
+            for (const r of rows) {
         if (!r.full) continue;
 
         const cleanName = r.full.replace(/\d{3}\/\d{2}R?\d{1,2}.*/, '').trim();
@@ -77,11 +74,12 @@ const fs = require('fs');
       await page.waitForTimeout(6000);
     }
   }
-
-  const header = 'Size,Brand,Model,"Dearth Motors OTD Price","Warehouse 1","Warehouse 2","Warehouse 3"\n';
+    const header = 'Size,Brand,Model,"Dearth Motors OTD Price","Warehouse 1","Warehouse 2","Warehouse 3"\n';
   const csv = header + tires.map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
 
   fs.writeFileSync('C:\\Users\\schif\\Desktop\\DEARTH_MOTORS_FULL_FLYNN.csv', csv);
   console.log(`\nFULL FLYNN CATALOG DONE! ${tires.length} tires 🔥`);
   console.log(`File → Desktop: DEARTH_MOTORS_FULL_FLYNN.csv`);
+
+  await browser.close();
 })();
