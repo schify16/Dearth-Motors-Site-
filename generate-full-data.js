@@ -1,3 +1,4 @@
+const playwright = require('playwright');
 const { chromium } = require('playwright');
 const fs = require('fs');
 
@@ -83,3 +84,4 @@ const fs = require('fs');
 
   await browser.close();
 })();
+
