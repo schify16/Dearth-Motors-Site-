@@ -1,0 +1,11 @@
+{
+  "name": "dearth-motors-update",
+  "version": "1.0.0",
+  "main": "generate-full-data.js",
+  "scripts": {
+    "start": "node generate-full-data.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}
