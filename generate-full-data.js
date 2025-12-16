@@ -21,18 +21,16 @@ const fs = require('fs');
   await page.click('text=Sign in');
   await page.waitForTimeout(10000);
 
-  // Go to search page and open the size dropdown to load all sizes
   await page.goto('https://flynn-preview.tireweb.com/Search/ByTireSize');
   await page.waitForTimeout(10000);
   await page.click('text=Select Tire Size');
   await page.waitForTimeout(5000);
 
-  // Get every size code from the dropdown
   const allSizeCodes = await page.$$eval('#SizeList option[value]', opts =>
     opts.map(o => o.value).filter(v => v && v.length > 5)
   );
 
-  console.log(`Found ${allSizeCodes.length} sizes — adding EVERY tire to your site!`);
+  console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire!`);
 
   const tires = [];
 
@@ -66,10 +64,13 @@ const fs = require('fs');
         const brand = parts[0] || '';
         const model = parts.slice(1).join(' ') || '';
 
-        const wholesale = r.price === 'Call' ? 'Call' : parseFloat(r.price.replace(/[^0-9.]/g, ''));
-        const otd = wholesale === 'Call' ? 'Call' : (wholesale + 40).toFixed(2);
+        let otd = 'Call';
+        if (r.price && r.price.includes('$')) {
+          const num = parseFloat(r.price.replace(/[^0-9.]/g, ''));
+          if (!isNaN(num)) otd = '$' + (num + 40).toFixed(2);
+        }
 
-        tires.push([cleanSize, brand, model, `$${otd}`, r.w1, r.w2, r.w3]);
+        tires.push([cleanSize, brand, model, otd, r.w1, r.w2, r.w3]);
       }
 
       if (!await page.$('a:has-text("Next"):not(.disabled)')) break;
@@ -81,7 +82,7 @@ const fs = require('fs');
   const dataJS = `const tires = [\n  ${tires.map(r => `["${r.join('","')}"]`).join(',\n  ')}\n];`;
 
   fs.writeFileSync('data.js', dataJS);
-  console.log(`\nEVERY FLYNN TIRE ADDED TO YOUR SITE! ${tires.length} tires with $40 markup`);
+  console.log(`\nEVERY TIRE FROM FLYNN ADDED TO YOUR SITE! ${tires.length} tires with $40 markup`);
   console.log(`Updated data.js — your site now has the full mirror!`);
 
   await browser.close();
