@@ -1,0 +1,14 @@
+body {font-family: 'Segoe UI', sans-serif; background:#0f172a; color:white; margin:0;}
+header {background:#dc2626; padding:30px; text-align:center;}
+.logo {font-size:4em; font-weight:900; letter-spacing:2px;}
+p {font-size:1.2em; margin-top:10px;}
+#cartBtn {background: #16a34a; color: white; border: none; padding:10px 20px; cursor: pointer; border-radius:5px; font-size:1.2em;}
+.search {margin:20px auto; max-width:600px;}
+input {width:100%; padding:12px; font-size:1.3em; border-radius:8px; border:none;}
+table {width:98%; margin:20px auto; border-collapse:collapse; background:white; color:black; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+th {background:#dc2626; color:white; padding:20px; font-size:1.2em;}
+td {padding:16px; text-align:center;}
+.price {font-weight:bold; color:#16a34a; font-size:1.4em;}
+.cart {background:white; color:black; padding:20px; margin:20px auto; max-width:600px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.hidden {display:none;}
+footer {text-align:center; padding:40px; font-size:0.9em; color:#94a3b8;}
