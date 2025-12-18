@@ -1,50 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dearth Motors Tire Wholesale</title>
-  <style>
-    body {font-family: Arial; background:#0f172a; color:white; margin:0; padding:20px;}
-    header {background:#dc2626; padding:30px; text-align:center;}
-    .logo {font-size:4em; font-weight:900;}
-    input {width:90%; max-width:600px; padding:15px; font-size:1.3em; margin:20px;}
-    table {width:100%; border-collapse:collapse; background:white; color:black; margin-top:20px;}
-    th {background:#dc2626; color:white; padding:15px;}
-    td {padding:12px; text-align:center;}
-    .price {font-weight:bold; color:#16a34a; font-size:1.4em;}
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <div class="logo">DEARTH MOTORS</div>
     <h1>Wholesale Tire Catalog</h1>
+    <p>Live inventory • $40 markup applied • 6% sales tax + $1/tire PTA at checkout</p>
   </header>
-  <center><input type="text" id="search" placeholder="Search size, brand, model..." onkeyup="filter()"></center>
+
+  <div class="search">
+    <input type="text" id="search" placeholder="Search size, brand, model..." onkeyup="filter()">
+  </div>
+
+  <div id="cart" class="cart hidden">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <p>Subtotal: $<span id="subtotal">0.00</span></p>
+    <p>PTA Tax ($1/tire): $<span id="pta">0.00</span></p>
+    <p>6% Sales Tax: $<span id="tax">0.00</span></p>
+    <p>Total: $<span id="total">0.00</span></p>
+    <button onclick="clearCart()">Clear Cart</button>
+  </div>
+
   <table id="table">
     <thead>
       <tr>
         <th>Size</th><th>Brand</th><th>Model</th><th>Dearth Motors OTD Price</th>
-        <th>Warehouse 1</th><th>Warehouse 2</th><th>Warehouse 3</th>
+        <th>Warehouse 1</th><th>Warehouse 2</th><th>Warehouse 3</th><th>Image</th><th>Add to Cart</th>
       </tr>
     </thead>
     <tbody id="body"></tbody>
   </table>
 
+  <footer>
+    Last updated: <span id="lastUpdate"></span> • Updates every 20 minutes automatically
+  </footer>
+
   <script src="data.js"></script>
   <script>
+    let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+
     function load() {
-      document.getElementById('body').innerHTML = tires.map(r => 
-        `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="price">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`
-      ).join('');
+      updateTable(tires);
+      updateLastUpdate();
+      updateCart();
     }
+
+    function updateTable(data) {
+      document.getElementById('body').innerHTML = data.map((r, i) => `
+        <tr>
+          <td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="price">${r[3]}</td>
+          <td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td>
+          <td><button onclick="openImage('${r[0]}')">View</button></td>
+          <td><button onclick="addToCart(${i})">Add</button></td>
+        </tr>`).join('');
+    }
+
+    function openImage(size) {
+      window.open(`https://flynn-preview.tireweb.com/images/tire/${size.replace(/\//g, '')}.jpg`, '_blank');
+    }
+
     function filter() {
       const term = document.getElementById('search').value.toLowerCase();
       const filtered = tires.filter(r => r.join(' ').toLowerCase().includes(term));
-      document.getElementById('body').innerHTML = filtered.map(r => 
-        `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="price">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`
-      ).join('');
+      updateTable(filtered);
     }
+
+    function addToCart(i) {
+      cart.push(tires[i]);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+    }
+
+    function updateCart() {
+      document.getElementById('cartCount').textContent = cart.length;
+      document.getElementById('cartItems').innerHTML = cart.map((t, i) => `
+        <div>${t[0]} ${t[1]} ${t[2]} — ${t[3]} <button onclick="removeFromCart(${i})">Remove</button></div>
+      `).join('');
+      const subtotal = cart.reduce((sum, t) => sum + parseFloat(t[3].replace('$', '')), 0);
+      const pta = cart.length * 1;
+      const tax = subtotal * 0.06;
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('pta').textContent = pta.toFixed(2);
+      document.getElementById('tax').textContent = tax.toFixed(2);
+      document.getElementById('total').textContent = (subtotal + pta + tax).toFixed(2);
+    }
+
+    function removeFromCart(i) {
+      cart.splice(i, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+    }
+
+    document.getElementById('cartBtn').onclick = () => {
+      document.getElementById('cart').classList.toggle('hidden');
+    };
+
+    function updateLastUpdate() {
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    }
+
     load();
   </script>
 </body>
