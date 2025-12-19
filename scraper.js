@@ -10,8 +10,8 @@ const fs = require('fs');
   await context.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
   const page = await context.newPage();
 
-  const USERNAME = 'dearthtm';
-  const PASSWORD = process.env.PASSWORD || 'YOUR_REAL_PASSWORD_HERE'; // use env var in Render for security
+  const USERNAME = 'dearthm';
+  const PASSWORD = process.env.PASSWORD || 'dearth'; // use env var in Render
 
   console.log('Logging in...');
   await page.goto('https://flynn-preview.tireweb.com/Logon/Login');
@@ -30,10 +30,57 @@ const fs = require('fs');
     opts.map(o => o.value).filter(v => v && v.length > 5)
   );
 
-  console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire!`);
+  console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire from Flynn!`);
 
   const tires = [];
 
   for (let i = 0; i < allSizeCodes.length; i++) {
     const sizeCode = allSizeCodes[i];
-    const cleanSize = sizeCode.replace(/(\d{3})(\d{2})(\d{1,2})/, '$
+    const cleanSize = sizeCode.replace(/(\d{3})(\d{2})(\d{1,2})/, '$1/$2R$3');
+    const url = `https://flynn-preview.tireweb.com/Search/ByTireSize/${sizeCode}?snowTiresOnly=False`;
+    console.log(`\n[${i+1}/${allSizeCodes.length}] ${cleanSize}`);
+    await page.goto(url);
+    await page.waitForTimeout(8000);
+
+    while (true) {
+      await page.waitForSelector('table tbody tr', { timeout: 10000 }).catch(() => {});
+
+      const rows = await page.$$eval('table tbody tr', rows => rows.map(tr => {
+        const c = tr.querySelectorAll('td');
+        return {
+          full: c[3]?.innerText.trim() || '',
+          price: c[c.length - 3]?.innerText.trim() || '',
+          w1: c[6]?.innerText.trim() || '0',
+          w2: c[7]?.innerText.trim() || '0',
+          w3: c[8]?.innerText.trim() || '0'
+        };
+      }));
+
+      for (const r of rows) {
+        if (!r.full) continue;
+
+        const cleanName = r.full.replace(/\d{3}\/\d{2}R?\d{1,2}.*/, '').trim();
+        const parts = cleanName.split(' ');
+        const brand = parts[0] || '';
+        const model = parts.slice(1).join(' ') || '';
+
+        const wholesale = r.price === 'Call' ? 'Call' : parseFloat(r.price.replace(/[^0-9.]/g, ''));
+        const otd = wholesale === 'Call' ? 'Call' : (wholesale + 40).toFixed(2);
+
+        tires.push([cleanSize, brand, model, `$${otd}`, r.w1, r.w2, r.w3]);
+      }
+
+      if (!await page.$('a:has-text("Next"):not(.disabled)')) break;
+      await page.click('a:has-text("Next"):not(.disabled)');
+      await page.waitForTimeout(6000);
+    }
+  }
+
+  const dataJS = `const tires = [\n  ${tires.map(r => `["${r.join('","')}"]`).join(',\n  ')}\n];`;
+
+  fs.writeFileSync('data.js', dataJS);
+  console.log(`EVERY TIRE FROM FLYNN ADDED! ${tires.length} tires with $40 markup`);
+  console.log(`Updated data.js — your site now has the full mirror!`);
+
+  await browser.close();
+})();
