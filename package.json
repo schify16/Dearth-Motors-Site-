@@ -8,4 +8,9 @@
   "dependencies": {
     "playwright": "^1.47.0"
   }
+{
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}
 }
