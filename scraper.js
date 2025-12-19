@@ -1,25 +1,20 @@
-const { chromium } = require('playwright');
+const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    viewport: { width: 1920, height: 1080 }
-  });
-  await context.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
-  const page = await context.newPage();
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const page = await browser.newPage();
 
-  const USERNAME = 'dearthm';
-  const PASSWORD = process.env.PASSWORD || 'dearth'; // use env var in Render
+  const USERNAME = 'dearthtm';
+  const PASSWORD = 'YOUR_REAL_PASSWORD_HERE';   // ← change only this
 
   console.log('Logging in...');
   await page.goto('https://flynn-preview.tireweb.com/Logon/Login');
-  await page.waitForLoadState('networkidle');
-  await page.fill('input[placeholder="Username"]', USERNAME);
-  await page.fill('input[placeholder="Password"]', PASSWORD);
+  await page.type('input[placeholder="Username"]', USERNAME);
+  await page.type('input[placeholder="Password"]', PASSWORD);
   await page.click('text=Sign in');
-  await page.waitForTimeout(10000);
+  await page.waitForNavigation({ waitUntil: 'networkidle0' });
+  console.log('Logged in');
 
   await page.goto('https://flynn-preview.tireweb.com/Search/ByTireSize');
   await page.waitForTimeout(10000);
@@ -30,7 +25,7 @@ const fs = require('fs');
     opts.map(o => o.value).filter(v => v && v.length > 5)
   );
 
-  console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire from Flynn!`);
+  console.log(`Found ${allSizeCodes.length} sizes — pulling EVERY tire with Puppeteer!`);
 
   const tires = [];
 
@@ -70,8 +65,9 @@ const fs = require('fs');
         tires.push([cleanSize, brand, model, `$${otd}`, r.w1, r.w2, r.w3]);
       }
 
-      if (!await page.$('a:has-text("Next"):not(.disabled)')) break;
-      await page.click('a:has-text("Next"):not(.disabled)');
+      const next = await page.$('a:has-text("Next"):not(.disabled)');
+      if (!next) break;
+      await next.click();
       await page.waitForTimeout(6000);
     }
   }
