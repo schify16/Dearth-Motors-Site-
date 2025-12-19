@@ -1,13 +1,11 @@
 {
   "name": "dearth-motors-update",
   "version": "1.0.0",
-  "main": "generate-full-data.js",
+  "main": "scraper.js",
   "scripts": {
-    "start": "node generate-full-data.js"
-{
+    "start": "node scraper.js"
+  },
   "dependencies": {
     "puppeteer": "^23.0.0"
   }
 }
-}
-
