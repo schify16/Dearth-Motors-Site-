@@ -4,13 +4,10 @@
   "main": "generate-full-data.js",
   "scripts": {
     "start": "node generate-full-data.js"
-  },
-  "dependencies": {
-    "playwright": "^1.47.0"
-  }
 {
   "dependencies": {
     "puppeteer": "^23.0.0"
   }
 }
 }
+
